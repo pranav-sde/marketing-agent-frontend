@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-const API_BASE = 'http://localhost:8080';
-const API_KEY = 'my_secure_api_key_123';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
+const API_KEY = import.meta.env.VITE_VARKETING_API_KEY || 'Press@001';
 
 function App() {
   const [activeTab, setActiveTab] = useState('calendar');
