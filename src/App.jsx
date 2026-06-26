@@ -404,6 +404,28 @@ function App() {
     }
   };
 
+  const handleDeleteMagazine = async () => {
+    if (!selectedMagazineId) return;
+    if (!window.confirm('Are you sure you want to delete this magazine issue and all its posts?')) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/v1/tenants/${selectedTenantId}/magazines/${selectedMagazineId}`, {
+        method: 'DELETE',
+        headers
+      });
+      if (res.ok) {
+        showToast('Magazine and associated calendar posts deleted successfully.');
+        await fetchMagazines(selectedTenantId);
+      } else {
+        showToast('Failed to delete magazine.', 'error');
+      }
+    } catch (err) {
+      showToast('Error deleting magazine.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCreateAdHocCampaign = async (e) => {
     e.preventDefault();
     if (!newAdHocForm.messageText) {
@@ -553,6 +575,17 @@ function App() {
                 Upload Magazine
                 <input type="file" accept=".pdf,image/*" style={{ display: 'none' }} onChange={handleFileUpload} />
               </label>
+
+              {selectedMagazineId && (
+                <button 
+                  className="btn-action" 
+                  style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }} 
+                  onClick={handleDeleteMagazine}
+                  disabled={loading}
+                >
+                  Delete Magazine
+                </button>
+              )}
 
               {selectedMagazineId && calendar.length === 0 && !loading && (
                 <button className="btn-action" style={{ background: '#10b981', color: 'white' }} onClick={handleGenerateCalendar}>
