@@ -242,6 +242,35 @@ function App() {
     }
   };
 
+  const handleSendNow = async (entryId) => {
+    const recipient = window.prompt(
+      'Enter recipient phone number with country code (e.g. +91XXXXXXXXXX or +1XXXXXXXXXX):',
+      '+919876543210'
+    );
+    if (recipient === null) return; // user cancelled
+
+    setCardLoadingId(entryId);
+    try {
+      const url = `${API_BASE}/v1/tenants/${selectedTenantId}/calendar/${entryId}/send?recipientPhone=${encodeURIComponent(recipient)}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setCalendar(calendar.map(item => item.id === entryId ? { ...item, status: updated.status } : item));
+        showToast(`Day ${updated.dayNumber} sent on WhatsApp successfully!`);
+      } else {
+        const errText = await res.text();
+        showToast(`Failed to send: ${errText}`, 'error');
+      }
+    } catch (err) {
+      showToast('Failed to trigger immediate broadcast.', 'error');
+    } finally {
+      setCardLoadingId(null);
+    }
+  };
+
   const handleOnHold = async (entryId) => {
     try {
       const res = await fetch(`${API_BASE}/v1/tenants/${selectedTenantId}/calendar/${entryId}/on-hold`, {
@@ -683,6 +712,14 @@ function App() {
                           disabled={cardLoadingId === item.id}
                         >
                           ✔️ Approve
+                        </button>
+                        <button
+                          className="btn-action"
+                          style={{ background: '#10b981', color: 'white', borderColor: '#10b981' }}
+                          onClick={() => handleSendNow(item.id)}
+                          disabled={cardLoadingId === item.id}
+                        >
+                          🚀 Send Now
                         </button>
                         <button
                           className="btn-action"
